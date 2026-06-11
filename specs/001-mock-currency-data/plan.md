@@ -27,14 +27,20 @@ Implement a service-layer mocking mechanism that allows the application to funct
 
 **Scale/Scope**: Small utility feature; impact limited to service layer.
 
+**CLARIFICATIONS RESOLVED (see research.md)**:
+1. **Precedence Logic**: `VITE_USE_MOCK_DATA=true` takes precedence over API key availability.
+2. **Bundle Exclusion**: Implementation will use dynamic `import()` to ensure mock data is code-split.
+3. **Mock Scope**: Supporting `DEFAULT_CURRENCIES` (USD, EUR, GBP, JPY, etc.).
+4. **Cache Interaction**: Mock data will return `isMock: true` and will NOT be stored in `localStorage`.
+
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+*GATE: PASSED*
 
-- **Principle I: Code Quality**: The approach uses explicit service-layer logic, maintaining SOLID principles by delegating mock generation to a separate module.
-- **Principle II: Testing**: Mock data simplifies automated integration testing by providing predictable inputs.
-- **Principle III: UX**: Immediate feedback is maintained; mock data ensures the app is usable "out of the box".
-- **Principle IV: Performance**: Mock data is faster than network calls, improving dev experience.
+- **Principle I: Code Quality**: Uses dynamic imports and explicit service patterns to maintain decoupling.
+- **Principle II: Testing**: Quickstart guide defines measurable validation scenarios (Scenario 1-4).
+- **Principle III: UX**: Prevents cache pollution and ensures "out of the box" functionality.
+- **Principle IV: Performance**: Code-splitting ensures zero bundle size impact on production code paths.
 
 ## Project Structure
 

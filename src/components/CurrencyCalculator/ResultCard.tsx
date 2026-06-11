@@ -8,9 +8,10 @@ interface ResultCardProps {
   result: number;
   isLoading?: boolean;
   error?: string | null;
+  isMock?: boolean;
 }
 
-const ResultCard: React.FC<ResultCardProps> = ({ amount, from, to, result, isLoading, error }) => {
+const ResultCard: React.FC<ResultCardProps> = ({ amount, from, to, result, isLoading, error, isMock }) => {
   if (error) {
     return <div className="result-card error" role="alert">{error}</div>;
   }
@@ -21,6 +22,11 @@ const ResultCard: React.FC<ResultCardProps> = ({ amount, from, to, result, isLoa
 
   return (
     <div className="result-card" aria-live="polite">
+      {isMock && (
+        <div className="mock-badge" title="Using simulated exchange rates">
+          Mock Mode
+        </div>
+      )}
       <div className="result-summary">
         {amount} {from} =
       </div>

@@ -1,30 +1,27 @@
 # Research: Mock Currency Data Implementation
 
-## Summary
-The goal is to provide a seamless developer experience by allowing the application to function without an external API key or network connection.
+## 1. Precedence Logic
+- **Decision**: `VITE_USE_MOCK_DATA=true` takes absolute precedence. If it is `false` or undefined, the service will check for `VITE_EXCHANGE_RATE_API_KEY`. If the key is missing or is the placeholder value (`YOUR_API_KEY`), the app will fall back to mock mode.
+- **Rationale**: This allows developers to force mock mode even if they have a key locally, and ensures the app works "out of the box" for new clones.
+- **Alternatives**: Always requiring an explicit flag. Rejected as it complicates initial onboarding.
 
-## Decisions
+## 2. Bundle Exclusion (Production Safety)
+- **Decision**: Use a dynamic import for `mockDataService` wrapped in a conditional that Vite can statically analyze.
+- **Implementation**:
+  ```typescript
+  if (isMockMode()) {
+    const { getMockRates } = await import('./mockDataService');
+    return getMockRates(baseCurrency);
+  }
+  ```
+- **Rationale**: Vite will move the `mockDataService` into a separate chunk. If the code path is never reached in production (due to the condition), the chunk might not be loaded, but more importantly, it isolates the mock logic from the main bundle.
+- **Alternatives**: MSW (Mock Service Worker). Rejected as overkill for this simple static data requirement.
 
-### 1. Implementation Strategy: Service-Layer Mocking
-- **Decision**: Use a conditional check within the service layer to return mock data.
-- **Rationale**: 
-    - **Simplicity**: No additional libraries like MSW are required.
-    - **Visibility**: It's clear to developers where the data is coming from.
-    - **Control**: Easy to trigger based on both explicit flags (`VITE_USE_MOCK_DATA`) and implicit state (missing API key).
-- **Alternatives Considered**: 
-    - **MSW (Mock Service Worker)**: Great for integration tests and complex apps, but adds overhead and complexity for this specific project.
-    - **Vite Proxy**: Can mock endpoints but is harder to configure for "missing API key" runtime logic.
+## 3. Mock Scope (Currencies)
+- **Decision**: Support the `DEFAULT_CURRENCIES` defined in `CurrencyCalculator.tsx`: `['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD']`.
+- **Rationale**: These are the primary currencies displayed when the API fails or is not yet loaded, so the mock data should align with them to provide a consistent "offline" experience.
 
-### 2. Mock Data Source
-- **Decision**: Create a dedicated `src/services/mockData.ts` file containing the static response structure.
-- **Rationale**: Keeps `exchangeRateService.ts` clean and allows for easy updates to the mock rates.
-
-### 3. Trigger Logic
-- **Decision**: Mock mode will activate if:
-    1. `import.meta.env.VITE_USE_MOCK_DATA === 'true'`
-    2. `VITE_EXCHANGE_RATE_API_KEY` is not provided or is set to default placeholder.
-- **Rationale**: Covers both intentional mocking and "first run" scenarios.
-
-## Unknowns Resolved
-- **Data Structure**: Confirmed `ExchangeRateAPIResponse` in `src/types/index.ts`. Mock data must include all mandatory fields (`result`, `base_code`, `conversion_rates`, etc.).
-- **Environment Variables**: Confirmed Vite uses `import.meta.env`.
+## 4. Cache Interaction
+- **Decision**: `fetchExchangeRates` will return an additional property `isMock: true`. The `useCurrencyConverter` hook will be updated to *skip* calling `setCachedRates` if `isMock` is true.
+- **Rationale**: Prevents mock data from polluting the `localStorage` cache, which should only store authoritative data from the real API.
+- **Alternatives**: Cache mock data with a special prefix (e.g., `mock_`). Rejected as unnecessary complexity.

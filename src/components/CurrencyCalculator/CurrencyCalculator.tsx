@@ -5,14 +5,14 @@ import ResultCard from './ResultCard';
 import { useCurrencyConverter } from '../../hooks/useCurrencyConverter';
 import './CurrencyCalculator.css';
 
-const DEFAULT_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD'];
+const DEFAULT_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'HKD', 'NZD', 'PLN'];
 
 const CurrencyCalculator: React.FC = () => {
   const [amount, setAmount] = useState<number>(1);
   const [from, setFrom] = useState<string>('USD');
   const [to, setTo] = useState<string>('EUR');
 
-  const { result, isLoading, error, rates } = useCurrencyConverter(amount, from, to);
+  const { result, isLoading, error, isMock, rates } = useCurrencyConverter(amount, from, to);
   
   const availableCurrencies = rates.length > 0 ? rates : DEFAULT_CURRENCIES;
 
@@ -43,6 +43,7 @@ const CurrencyCalculator: React.FC = () => {
         result={result}
         isLoading={isLoading}
         error={error}
+        isMock={isMock}
       />
     </div>
   );

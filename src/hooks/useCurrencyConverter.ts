@@ -7,6 +7,7 @@ export const useCurrencyConverter = (amount: number, from: string, to: string) =
   const [rates, setRates] = useState<Record<string, number>>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isMock, setIsMock] = useState<boolean>(false);
 
   const debouncedAmount = useDebounce(amount, 300);
   const debouncedFrom = useDebounce(from, 300);
@@ -16,6 +17,7 @@ export const useCurrencyConverter = (amount: number, from: string, to: string) =
       const cached = getCachedRates(debouncedFrom);
       if (cached) {
         setRates(cached);
+        setIsMock(false);
         return;
       }
 
@@ -25,7 +27,12 @@ export const useCurrencyConverter = (amount: number, from: string, to: string) =
         const data = await fetchExchangeRates(debouncedFrom);
         if (data.result === 'success' && data.conversion_rates) {
           setRates(data.conversion_rates);
-          setCachedRates(debouncedFrom, data.conversion_rates);
+          setIsMock(!!data.isMock);
+          
+          // Only cache real API data
+          if (!data.isMock) {
+            setCachedRates(debouncedFrom, data.conversion_rates);
+          }
         } else {
           throw new Error(data['error-type'] || 'Invalid API response');
         }
@@ -45,6 +52,7 @@ export const useCurrencyConverter = (amount: number, from: string, to: string) =
     result,
     isLoading,
     error,
+    isMock,
     rates: Object.keys(rates)
   };
 };

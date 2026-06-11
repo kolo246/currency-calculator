@@ -13,8 +13,12 @@ const isMockMode = (): boolean => {
 export const fetchExchangeRates = async (baseCurrency: string): Promise<ExchangeRateAPIResponse> => {
   if (isMockMode()) {
     console.log(`[ExchangeRateService] Using mock data for ${baseCurrency}`);
+    
+    // Dynamic import to ensure mock data is code-split from production bundle
+    const { getMockRates } = await import('./mockDataService');
+    
     return new Promise((resolve) => {
-      // Simulate network delay
+      // Simulate network delay for realistic UI feedback
       setTimeout(() => {
         resolve(getMockRates(baseCurrency));
       }, 300);

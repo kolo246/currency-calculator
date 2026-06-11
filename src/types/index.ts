@@ -14,6 +14,8 @@ export interface ExchangeRateAPIResponse {
   time_next_update_utc: string;
   base_code: string;
   conversion_rates: Record<string, number>;
+  isMock?: boolean;
+  'error-type'?: string;
 }
 
 export interface CachedRates {

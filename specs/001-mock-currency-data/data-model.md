@@ -2,29 +2,24 @@
 
 ## Entities
 
-### MockExchangeRateResponse
-Represents the mocked response from the ExchangeRate-API.
+### MockExchangeRates
+Represents the structure of the mock data returned by the `mockDataService`.
 
 | Field | Type | Description |
-|-------|------|-------------|
-| result | string | Always "success" |
-| documentation | string | Placeholder URL |
-| terms_of_use | string | Placeholder URL |
-| time_last_update_unix | number | Current timestamp (mocked) |
-| time_last_update_utc | string | Current date/time string (mocked) |
-| base_code | string | The currency used as base for rates |
-| conversion_rates | Record<string, number> | Map of currency codes to their exchange rates |
-
-## Mock Data Set
-Initial set of currencies to be supported in mock mode:
-- USD: 1.0 (Base)
-- EUR: 0.92
-- GBP: 0.79
-- JPY: 151.5
-- AUD: 1.52
-- CAD: 1.35
+| :--- | :--- | :--- |
+| `base_code` | `string` | The currency code being converted from. |
+| `conversion_rates` | `Record<string, number>` | Map of target currency codes to exchange rates. |
+| `time_last_update_unix` | `number` | Static timestamp (simulated). |
+| `isMock` | `boolean` | Flag indicating this data is simulated. |
 
 ## Validation Rules
-1. `conversion_rates` MUST NOT be empty.
-2. `base_code` MUST be present in `conversion_rates` (usually with value 1.0).
-3. All rates MUST be positive numbers.
+- `conversion_rates` must include all `DEFAULT_CURRENCIES`.
+- Exchange rates must be positive numbers.
+- `base_code` must be a valid 3-letter currency code.
+
+## State Transitions
+1. **Request**: `fetchExchangeRates(base)` is called.
+2. **Evaluate Mode**: System checks `VITE_USE_MOCK_DATA` and `VITE_EXCHANGE_RATE_API_KEY`.
+3. **Mock Branch**: If in mock mode, `mockDataService` is dynamically loaded.
+4. **Response**: Mock data is returned with `isMock: true`.
+5. **UI Update**: `useCurrencyConverter` hook receives data, updates state, and bypasses persistent cache.

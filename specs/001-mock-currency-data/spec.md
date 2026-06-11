@@ -55,11 +55,15 @@ As a developer, I want to easily modify mock values to test specific UI states (
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide a mechanism to toggle mock data usage (e.g., via environment variable `VITE_USE_MOCK_DATA` or by detecting a missing API key).
-- **FR-002**: System MUST include a static set of exchange rates for common currencies (at minimum: USD, EUR, GBP, JPY).
-- **FR-003**: System MUST return the mock data in the same format as the production API response to ensure compatibility.
-- **FR-004**: System MUST NOT use mock data in a production environment.
-- **FR-005**: System MUST log a message to the console when mock data is being used to alert the developer.
+- **FR-001**: System MUST provide a mechanism to toggle mock data usage. `VITE_USE_MOCK_DATA=true` takes absolute precedence; otherwise, mock mode is activated if `VITE_EXCHANGE_RATE_API_KEY` is missing or set to the placeholder value.
+- **FR-002**: System MUST include a static set of exchange rates covering at minimum the `DEFAULT_CURRENCIES` (USD, EUR, GBP, JPY, AUD, CAD, CHK, CNY, HKD, NZD).
+- **FR-003**: System MUST return mock data in the same format as the production API response, including an `isMock: true` property.
+- **FR-004**: System MUST NOT include mock data or mock service logic in the production bundle. This MUST be enforced via build-time code splitting (e.g., dynamic imports).
+- **FR-005**: System MUST log a message to the console when mock data is active.
+- **FR-006**: System MUST bypass the `localStorage` cache when mock mode is active to prevent data pollution.
+- **FR-007**: System MUST provide a visible indicator in the UI (e.g., a "Mock Mode" badge) when using simulated data to ensure developer awareness. [Gap]
+- **FR-008**: Mock service MUST return data in under 50ms to simulate a "local-only" experience. [Measurability]
+- **FR-009**: System MUST handle missing currencies in the mock dataset by falling back to a base rate of 1.0 or displaying a clear "Currency Not Supported in Mock" error. [Edge Case]
 
 ### Key Entities *(include if feature involves data)*
 

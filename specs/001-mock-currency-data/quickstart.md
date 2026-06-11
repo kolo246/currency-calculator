@@ -1,35 +1,41 @@
-# Quickstart Validation: Mock Currency Data
+# Quickstart: Validating Mock Currency Data
 
-This guide describes how to verify the mock data implementation.
+This guide provides scenarios to verify that the mock data system is functioning correctly.
 
-## Setup for Validation
+## Prerequisites
+- Node.js installed.
+- Project dependencies installed (`npm install`).
 
-1.  **Option A: No API Key**
-    - Ensure `.env` does not contain `VITE_EXCHANGE_RATE_API_KEY` or it is set to `YOUR_API_KEY`.
-2.  **Option B: Explicit Mock Mode**
-    - Add `VITE_USE_MOCK_DATA=true` to your `.env` file.
+## Scenario 1: Force Mock Mode
+**Goal**: Verify the app uses mock data even if an API key is present.
 
-## Validation Scenarios
+1. Create/Update `.env`:
+   ```env
+   VITE_USE_MOCK_DATA=true
+   VITE_EXCHANGE_RATE_API_KEY=any_key
+   ```
+2. Start the app: `npm run dev`
+3. Open the browser and check the network tab.
+4. **Expected**: No network calls to `exchangerate-api.com`. Console should show `[ExchangeRateService] Using mock data`.
 
-### Scenario 1: Initial Load (No Config)
-- **Prerequisites**: Fresh clone, no `.env` file.
-- **Action**: Run `npm run dev`.
-- **Expected Outcome**:
-    - App loads without errors.
-    - Console shows "Using mock exchange rates".
-    - Default conversion (e.g., USD to EUR) displays a result (e.g., 100 USD = 92 EUR).
+## Scenario 2: Default "Out-of-the-Box" Mode
+**Goal**: Verify the app works for new developers without configuration.
 
-### Scenario 2: Offline Resilience
-- **Prerequisites**: Enable airplane mode or disconnect internet.
-- **Action**: Refresh the application.
-- **Expected Outcome**:
-    - Application remains functional.
-    - Currency dropdowns are populated.
-    - Conversions continue to work using mock rates.
+1. Ensure `.env` is empty or does not contain `VITE_EXCHANGE_RATE_API_KEY`.
+2. Start the app: `npm run dev`
+3. **Expected**: App functions correctly with conversion results.
 
-### Scenario 3: Production Safety
-- **Prerequisites**: Run `npm run build`.
-- **Action**: Inspect the bundle or run the production build locally.
-- **Expected Outcome**:
-    - Mock data logic is either tree-shaken or inactive.
-    - The application still attempts to hit the real API in production mode (unless explicitly configured otherwise, though SC-003 mandates no mock data in production).
+## Scenario 3: Cache Bypass Verification
+**Goal**: Ensure mock data is not saved to `localStorage`.
+
+1. Enable mock mode (Scenario 1).
+2. Perform a conversion.
+3. Check `localStorage` in DevTools.
+4. **Expected**: No new entries for the base currency in the `rates-cache` key (or equivalent).
+
+## Scenario 4: Bundle Analysis (Advanced)
+**Goal**: Verify `mockDataService` is code-split.
+
+1. Run build: `npm run build`
+2. Inspect `dist/assets` directory.
+3. **Expected**: The mock data and its service logic should be in a separate, asynchronously loaded chunk.
